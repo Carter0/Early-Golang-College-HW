@@ -61,6 +61,7 @@ func main() {
 		ip[i] = split[0]
 		port[i] = split[1]
 	}
+
 	var network string
 	if *useUnix {
 		network = "unix"
