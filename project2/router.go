@@ -34,6 +34,8 @@ func main() {
 		networkType = "unixpacket"
 	}
 
+	fmt.Println("Argument Parsing")
+
 	ip := make([]string, len(args))
 	port := make([]string, len(args))
 	for i, network := range args {
@@ -41,12 +43,15 @@ func main() {
 		ip[i] = split[0]
 		port[i] = split[1]
 
+		fmt.Println("Socket connection")
+
 		//Open sockets and start listening.
 		conn, err := net.Dial(networkType, "./"+ip[i])
 		if err != nil {
 			panic(err)
 		}
 
+		fmt.Println("Starting goroutines")
 		go handleConnection(conn)
 
 	}
