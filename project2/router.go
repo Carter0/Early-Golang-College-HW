@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"net"
@@ -10,18 +9,15 @@ import (
 
 func handleConnection(conn net.Conn) {
 	//TODO, figure out how to read in json in golang.
-	reader := bufio.NewReader(conn)
-	if reader == nil {
-		println("reader did not find anything")
-	}
 
-	message, err := reader.ReadString('\n')
-	if err != nil {
-		println("Error message for message")
-		fmt.Println(err)
-	}
+	fmt.Println(conn)
 
-	print(message)
+	// message, err := bufio.NewReader(conn).ReadString('\n')
+	// if err != nil {
+	// 	println("reader did not find anything")
+	// }
+	// print(message)
+
 }
 
 func main() {
