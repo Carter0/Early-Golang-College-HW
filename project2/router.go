@@ -13,7 +13,7 @@ func handleConnection(conn net.Conn) {
 	//TODO, figure out how to read in json in golang.
 
 	fmt.Println(conn)
-    fmt.Println("Starting jsonDecocer")
+	fmt.Println("Starting jsonDecoder")
 	dec := json.NewDecoder(conn)
 
 	var v map[string]interface{}
@@ -25,12 +25,6 @@ func handleConnection(conn net.Conn) {
 	for k := range v {
 		println(k)
 	}
-
-	// message, err := bufio.NewReader(conn).ReadString('\n')
-	// if err != nil {
-	// 	println("reader did not find anything")
-	// }
-	// print(message)
 
 	//TODO, I think you might need to return something here. Perhaps a channel.
 
@@ -69,6 +63,8 @@ func main() {
 
 		fmt.Println("Starting goroutines")
 		go handleConnection(conn)
+
+		fmt.Scanln()
 
 	}
 }
