@@ -7,11 +7,10 @@ import (
 	"log"
 	"net"
 	"strings"
-	"sync"
 )
 
 //Keep track of how many goroutines are running
-var wg sync.WaitGroup
+//var wg sync.WaitGroup
 
 func handleConnection(conn net.Conn) {
 	//TODO, figure out how to read in json in golang.
@@ -67,17 +66,20 @@ func main() {
 			panic(err)
 		}
 
-		//Create a lamba function that starts immediatly.
-		//Add on to the waitgroup
-		//When goroutine is done subtract one from the waitgroup
-		go func() {
-			fmt.Println("Starting goroutines")
-			wg.Add(1)
-			go handleConnection(conn)
-			wg.Done()
-		}()
+		go handleConnection(conn)
+
+		// //Create a lamba function that starts immediatly.
+		// //Add on to the waitgroup
+		// //When goroutine is done subtract one from the waitgroup
+		// go func() {
+		// 	fmt.Println("Starting goroutines")
+		// 	wg.Add(1)
+		// 	go handleConnection(conn)
+		// 	wg.Done()
+		// }()
 
 		//Wait till all goroutines are done before leaving program.(waitgroup # = 0)
-		wg.Wait()
+		//wg.Wait()
 	}
+	select {}
 }
