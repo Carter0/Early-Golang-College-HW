@@ -10,6 +10,9 @@ import (
 	"sync"
 )
 
+//Keep track of how many goroutines are running
+var wg sync.WaitGroup
+
 func handleConnection(conn net.Conn) {
 	//TODO, figure out how to read in json in golang.
 
@@ -63,9 +66,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-
-		//Keep track of how many goroutines are running
-		var wg sync.WaitGroup
 
 		//Create a lamba function that starts immediatly.
 		//Add on to the waitgroup
