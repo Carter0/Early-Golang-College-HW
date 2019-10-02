@@ -12,6 +12,7 @@ import (
 var wg sync.WaitGroup
 
 func handleConnection(conn net.Conn) {
+	defer wg.Done()
 	//TODO, figure out how to read in json in golang.
 
 	// fmt.Println(conn)
@@ -65,7 +66,6 @@ func main() {
 			fmt.Println("Starting goroutines")
 			wg.Add(1)
 			go handleConnection(conn)
-			wg.Done()
 		}()
 
 	}
