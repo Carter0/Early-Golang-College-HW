@@ -33,18 +33,12 @@ func handleConnection(conn net.Conn) {
 func main() {
 
 	args := os.Args
-
-	fmt.Println("Argument Parsing")
-
 	ip := make([]string, len(args))
 	port := make([]string, len(args))
 	for i, network := range args[1:] {
 		split := strings.Split(network, "-")
 		ip[i] = split[0]
 		port[i] = split[1]
-
-		fmt.Println(ip[i])
-		fmt.Println(port[i])
 
 		fmt.Println("Socket connection")
 
@@ -59,5 +53,4 @@ func main() {
 
 	}
 	select {}
-
 }
