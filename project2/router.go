@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 )
@@ -11,6 +13,18 @@ func handleConnection(conn net.Conn) {
 	//TODO, figure out how to read in json in golang.
 
 	fmt.Println(conn)
+	dec := json.NewDecoder(conn)
+	for {
+		var v map[string]interface{}
+		if err := dec.Decode(&v); err != nil {
+			log.Println(err)
+			return
+		}
+
+		for k := range v {
+			println(k)
+		}
+	}
 
 	// message, err := bufio.NewReader(conn).ReadString('\n')
 	// if err != nil {
