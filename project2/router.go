@@ -14,16 +14,15 @@ func handleConnection(conn net.Conn) {
 
 	fmt.Println(conn)
 	dec := json.NewDecoder(conn)
-	for {
-		var v map[string]interface{}
-		if err := dec.Decode(&v); err != nil {
-			log.Println(err)
-			return
-		}
 
-		for k := range v {
-			println(k)
-		}
+	var v map[string]interface{}
+	if err := dec.Decode(&v); err != nil {
+		log.Println(err)
+		return
+	}
+
+	for k := range v {
+		println(k)
 	}
 
 	// message, err := bufio.NewReader(conn).ReadString('\n')
