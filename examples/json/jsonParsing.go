@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 	"os"
-	"json"
 )
 
 //Message is the testing data for json.
