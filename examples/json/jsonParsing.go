@@ -1,9 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"os"
+	"json"
 )
 
 //Message is the testing data for json.
@@ -14,6 +14,7 @@ type Message struct {
 }
 
 func main() {
+
 	//Encoding the json message.
 	m := Message{"Alice", "Hello", 1294706395881547000}
 	b, err := json.Marshal(m)
@@ -54,5 +55,4 @@ func main() {
 			log.Println(err)
 		}
 	}
-
 }
