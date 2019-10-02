@@ -41,13 +41,6 @@ func main() {
 
 	args := flag.Args()
 
-	var networkType string
-	if *useUnix {
-		networkType = "unix"
-	} else {
-		networkType = "unixpacket"
-	}
-
 	fmt.Println("Argument Parsing")
 
 	ip := make([]string, len(args))
@@ -65,7 +58,6 @@ func main() {
 			panic(err)
 		}
 
-		go handleConnection(conn)
 
 		//Create a lamba function that starts immediatly.
 		//Add on to the waitgroup
@@ -77,7 +69,8 @@ func main() {
 			wg.Done()
 		}()
 
-		//Wait till all goroutines are done before leaving program.(waitgroup # = 0)
-		wg.Wait()
 	}
+
+	//Wait till all goroutines are done before leaving program.(waitgroup # = 0)
+	wg.Wait()
 }
