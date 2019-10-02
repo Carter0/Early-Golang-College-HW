@@ -42,7 +42,7 @@ func main() {
 
 	ip := make([]string, len(args))
 	port := make([]string, len(args))
-	for i, network := range args {
+	for i, network := range args[1:] {
 		split := strings.Split(network, "-")
 		ip[i] = split[0]
 		port[i] = split[1]
