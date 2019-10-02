@@ -15,16 +15,18 @@ func handleConnection(conn net.Conn) {
 
 	fmt.Println(conn)
 	fmt.Println("Starting jsonDecoder")
-	dec := json.NewDecoder(conn)
 
-	var v map[string]interface{}
-	if err := dec.Decode(&v); err != nil {
-		log.Println(err)
-		return
-	}
+	for {
+		dec := json.NewDecoder(conn)
+		var v map[string]interface{}
+		if err := dec.Decode(&v); err != nil {
+			log.Println(err)
+			return
+		}
 
-	for k := range v {
-		println(k)
+		for k := range v {
+			println(k)
+		}
 	}
 
 	//TODO, I think you might need to return something here. Perhaps a channel.
