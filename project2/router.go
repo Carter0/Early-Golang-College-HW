@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 )
 
 func handleConnection(conn net.Conn) {
@@ -61,10 +62,20 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Println("Starting goroutines")
-		go handleConnection(conn)
+		//Keep track of how many goroutines are running
+		var wg sync.WaitGroup
 
-		fmt.Scanln()
+		//Create a lamba function that starts immediatly.
+		//Add on to the waitgroup
+		//When goroutine is done subtract one from the waitgroup
+		go func() {
+			fmt.Println("Starting goroutines")
+			wg.Add(1)
+			go handleConnection(conn)
+			wg.Done()
+		}()
 
+		//Wait till all goroutines are done before leaving program.(waitgroup # = 0)
+		wg.Wait()
 	}
 }
