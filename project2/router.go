@@ -13,6 +13,7 @@ func handleConnection(conn net.Conn) {
 	//TODO, figure out how to read in json in golang.
 
 	fmt.Println(conn)
+    fmt.Println("Starting jsonDecocer")
 	dec := json.NewDecoder(conn)
 
 	var v map[string]interface{}
