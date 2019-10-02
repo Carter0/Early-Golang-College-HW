@@ -1,9 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"sync"
 )
@@ -36,10 +36,7 @@ func handleConnection(conn net.Conn) {
 
 func main() {
 
-	var useUnix = flag.Bool("u", false, "Use plain unix socket instead of SOCK_SEQPACKET")
-	flag.Parse()
-
-	args := flag.Args()
+	args := os.Args
 
 	fmt.Println("Argument Parsing")
 
@@ -50,14 +47,16 @@ func main() {
 		ip[i] = split[0]
 		port[i] = split[1]
 
+		fmt.Println(ip[i])
+		fmt.Println(port[i])
+
 		fmt.Println("Socket connection")
 
 		//Open sockets and start listening.
-		conn, err := net.Dial(networkType, "./"+ip[i])
+		conn, err := net.Dial("unixpacket", "./"+ip[i])
 		if err != nil {
 			panic(err)
 		}
-
 
 		//Create a lamba function that starts immediatly.
 		//Add on to the waitgroup
