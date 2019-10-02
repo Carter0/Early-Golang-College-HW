@@ -18,6 +18,8 @@ func handleConnection(conn net.Conn) {
 	// }
 	// print(message)
 
+	//TODO, I think you might need to return something here. Perhaps a channel.
+
 }
 
 func main() {
