@@ -28,6 +28,8 @@ func handleConnection(conn net.Conn) {
 
 	//TODO, I think you might need to return something here. Perhaps a channel.
 
+    fmt.Println("testing")
+
 }
 
 func main() {
