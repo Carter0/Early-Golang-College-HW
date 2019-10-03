@@ -1,35 +1,33 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"strings"
 )
 
+// message represents a message from a neighbor to the router.
+type message struct {
+	Msg  interface{} `json:"msg"`
+	Src  string      `json:"src"`
+	Dst  string      `json:"dst"`
+	Type string      `json:"type"`
+}
+
 func handleConnection(conn net.Conn) {
-	//TODO, figure out how to read in json in golang.
+	for {
+		var m message
 
-	// fmt.Println(conn)
-	// fmt.Println("Starting jsonDecoder")
+		err := json.NewDecoder(conn).Decode(&m)
+		if err != nil {
+			log.Fatal("error decoding message ", err)
+		}
 
-	// for {
-	// 	dec := json.NewDecoder(conn)
-	// 	var v map[string]interface{}
-	// 	if err := dec.Decode(&v); err != nil {
-	// 		log.Println(err)
-	// 		return
-	// 	}
-
-	// 	for k := range v {
-	// 		println(k)
-	// 	}
-	// }
-
-	//TODO, I think you might need to return something here. Perhaps a channel.
-
-    fmt.Println("testing")
-
+		fmt.Println(m.Type)
+	}
 }
 
 func main() {
@@ -54,5 +52,6 @@ func main() {
 		go handleConnection(conn)
 
 	}
+	//TODO, look up exactly what this does later.
 	select {}
 }
