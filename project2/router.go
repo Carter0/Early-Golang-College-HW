@@ -39,7 +39,7 @@ func handleConnection(conn net.Conn) {
 
 		network := gjson.Get(m.Src, "network")
 		print("The gjson msg value is: ")
-		println(network)
+		println(network.String())
 	}
 
 }
