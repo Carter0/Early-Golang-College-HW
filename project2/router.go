@@ -29,10 +29,12 @@ func handleConnection(conn net.Conn) {
 			log.Fatal("error decoding message ", err)
 		}
 
+		print("The message is")
 		println(m.Msg)
-		println(m.Src)
-		println(m.Dst)
-		println(m.Type)
+
+		println("The source is " + m.Src)
+		println("The destination is " + m.Dst)
+		println("The type is " + m.Type)
 	}
 
 }
