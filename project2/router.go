@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+type routingTable struct {
+}
+
 // message represents a message from a neighbor to the router.
 type message struct {
 	Msg  interface{} `json:"msg"`
@@ -26,8 +29,12 @@ func handleConnection(conn net.Conn) {
 			log.Fatal("error decoding message ", err)
 		}
 
-		fmt.Println(m.Type)
+		println(m.Msg)
+		println(m.Src)
+		println(m.Dst)
+		println(m.Type)
 	}
+
 }
 
 func main() {
@@ -52,6 +59,6 @@ func main() {
 		go handleConnection(conn)
 
 	}
-	//TODO, look up exactly what this does later.
+
 	select {}
 }
