@@ -7,9 +7,15 @@ import (
 	"net"
 	"os"
 	"strings"
+
+	"github.com/tidwall/gjson"
 )
 
+// routingTable represents the list of paths for our network.
 type routingTable struct {
+	ip     string //ip to send data through
+	subnet string //subet mask for the ip
+	//TODO -> add more fields as needed later.
 }
 
 // message represents a message from a neighbor to the router.
@@ -21,6 +27,8 @@ type message struct {
 }
 
 func handleConnection(conn net.Conn) {
+
+	//var routes []routingTable
 	for {
 		var m message
 
@@ -29,12 +37,9 @@ func handleConnection(conn net.Conn) {
 			log.Fatal("error decoding message ", err)
 		}
 
-		print("The message is")
-		println(m.Msg)
-
-		println("The source is " + m.Src)
-		println("The destination is " + m.Dst)
-		println("The type is " + m.Type)
+		value := gjson.Get(m.Src)
+		print("The gjson msg value is: ")
+		println(value)
 	}
 
 }
