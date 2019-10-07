@@ -75,14 +75,14 @@ func handleConnection(conn net.Conn) {
 		tempType := gjson.Get(string(temp), "type").String()
 		tempRoute = createRTData(conn, m, tempType)
 
-		mutex.Lock()
+		//mutex.Lock()
 		if val, ok := routingtable[tempTuple]; ok {
 			val = append(val, &tempRoute)
 		} else {
 			rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
 			routingtable[tempTuple] = rtArray
 		}
-		mutex.Unlock()
+		//mutex.Unlock()
 	}
 }
 
