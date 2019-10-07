@@ -8,15 +8,23 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/tidwall/gjson"
 )
 
-// routingTable represents the list of paths for our network.
-type routingTable struct {
-	ip     string //ip to send data through
-	subnet string //subet mask for the ip
-	//TODO -> add more fields as needed later.
+// rtData contains a copy of the original message sent to the router
+// as well as necessary data for the routing table at the top level.
+type rtData struct {
+	relationshipType string
+	Msg              []byte
+	Conn             net.Conn
+}
+
+// networkTuple represents the list of paths for our network.
+type networkTuple struct {
+	ip      string //ip to send data through
+	netMask string //subet mask for the ip
 }
 
 // message represents a message from a neighbor to the router.
@@ -27,7 +35,8 @@ type message struct {
 	Type string      `json:"type"`
 }
 
-var routes []routingTable
+var routingtable = map[networkTuple][]*rtData{}
+var mutex sync.Mutex
 
 //IP4toInt converts an ip address into a binary sequence
 func IP4toInt(IPv4Addr string) int64 {
@@ -36,10 +45,19 @@ func IP4toInt(IPv4Addr string) int64 {
 	return IPv4Int.Int64()
 }
 
+//CreateRTData creates the routing table information
+func createRTData(conn net.Conn, m message, tempType string) rtData {
+	message, err := json.Marshal(m.Msg)
+	if err != nil {
+		panic(err)
+	}
+	return rtData{tempType, message, conn}
+}
+
 func handleConnection(conn net.Conn) {
 	for {
 		var m message
-		var tempRoute routingTable
+		var tempRoute rtData
 
 		err := json.NewDecoder(conn).Decode(&m)
 		if err != nil {
@@ -50,17 +68,22 @@ func handleConnection(conn net.Conn) {
 		if err != nil {
 			panic(err)
 		}
+
 		tempIP := gjson.Get(string(temp), "network")
 		tempSubnet := gjson.Get(string(temp), "netmask")
-		tempRoute.ip = tempIP.String()
-		tempRoute.subnet = tempSubnet.String()
-		routes = append(routes, tempRoute)
-	}
+		tempTuple := networkTuple{tempIP.String(), tempSubnet.String()}
+		tempType := gjson.Get(string(temp), "type").String()
+		tempRoute = createRTData(conn, m, tempType)
 
-	//TODO send update messages to the other neighbors
-	//In update message, change the src you are given to the destination
-	//you are given. Use the neighbors source to send info over tcp
-	//You are supposed to keep a running connection to your neighbors.
+		mutex.Lock()
+		if val, ok := routingtable[tempTuple]; ok {
+			val = append(val, &tempRoute)
+		} else {
+			rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
+			routingtable[tempTuple] = rtArray
+		}
+		mutex.Unlock()
+	}
 }
 
 func main() {
@@ -83,8 +106,23 @@ func main() {
 
 		fmt.Println("Starting goroutines")
 		go handleConnection(conn)
-
 	}
 
+	//TODO make a loop through the hashmap. If statements for the key, value pairs.
+
+	for key, value := range routingtable {
+		print("Network name" + key.ip)
+		print("Network mask" + key.netMask)
+		for _, rtInfo := range value {
+			println(rtInfo.relationshipType)
+		}
+	}
+
+	//TODO, what the hell is this doing lol.
 	select {}
+
+	//TODO send update messages to the other neighbors
+	//In update message, change the src you are given to the destination
+	//you are given. Use the neighbors source to send info over tcp
+	//You are supposed to keep a running connection to your neighbors.
 }
