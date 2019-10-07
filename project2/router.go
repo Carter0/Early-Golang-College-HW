@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/big"
 	"net"
 	"os"
 	"strings"
@@ -26,11 +27,19 @@ type message struct {
 	Type string      `json:"type"`
 }
 
-func handleConnection(conn net.Conn) {
+var routes []routingTable
 
-	//var routes []routingTable
+//IP4toInt converts an ip address into a binary sequence
+func IP4toInt(IPv4Addr string) int64 {
+	IPv4Int := big.NewInt(0)
+	IPv4Int.SetBytes(net.ParseIP(IPv4Addr).To4())
+	return IPv4Int.Int64()
+}
+
+func handleConnection(conn net.Conn) {
 	for {
 		var m message
+		var tempRoute routingTable
 
 		err := json.NewDecoder(conn).Decode(&m)
 		if err != nil {
@@ -41,11 +50,17 @@ func handleConnection(conn net.Conn) {
 		if err != nil {
 			panic(err)
 		}
-		network := gjson.Get(string(temp), "network")
-		print("The gjson msg value is: ")
-		println(network.String())
+		tempIP := gjson.Get(string(temp), "network")
+		tempSubnet := gjson.Get(string(temp), "netmask")
+		tempRoute.ip = tempIP.String()
+		tempRoute.subnet = tempSubnet.String()
+		routes = append(routes, tempRoute)
 	}
 
+	//TODO send update messages to the other neighbors
+	//In update message, change the src you are given to the destination
+	//you are given. Use the neighbors source to send info over tcp
+	//You are supposed to keep a running connection to your neighbors.
 }
 
 func main() {
