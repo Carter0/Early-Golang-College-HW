@@ -81,9 +81,12 @@ func handleConnection(conn net.Conn) {
 		mutex.Lock()
 		if val, ok := routingtable[tempTuple]; ok {
 			val = append(val, &tempRoute)
+			println("is in map already")
 		} else {
+			println("Adding data to the routing table.")
 			rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
 			routingtable[tempTuple] = rtArray
+			println("Added data to the table.")
 		}
 		mutex.Unlock()
 		println("End of goroutine")

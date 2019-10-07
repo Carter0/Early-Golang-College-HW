@@ -3,6 +3,7 @@ package main
 import (
 	"math/big"
 	"net"
+	"os"
 	"strconv"
 )
 
@@ -14,6 +15,7 @@ func IP4toInt(IPv4Addr string) int64 {
 }
 
 func main() {
+
 	// //Figure out how to convert an ip address into binary.
 	// s1 := net.ParseIP("192.0.2.33")
 	// if s1 != nil {
@@ -30,18 +32,25 @@ func main() {
 	// 	println(strconv.FormatInt(i64, 2))
 	// }
 
-	//Here is an ip to test
-	network := IP4toInt("192.0.2.0")
-
-	//Here is a subnet mask to test.
-	subnet := IP4toInt("255.255.255.0")
+	input := os.Args[1:]
+	network := IP4toInt(input[0])
+	subnet := IP4toInt(input[2])
 
 	//The and of the network to route to and the subnet.
 	result := network & subnet
-	println(strconv.FormatInt(result, 2))
+	binaryResult := strconv.FormatInt(result, 2)
+	println(binaryResult)
 
 	//The and of something located the network.
-	result2 := IP4toInt("192.0.2.33")
-	println(strconv.FormatInt(result2&subnet, 2))
+	result2 := IP4toInt(input[1])
+	binaryResult2 := strconv.FormatInt(result2, 2)
+	println(binaryResult2)
+
+	for i := range binaryResult {
+		if binaryResult[i] != binaryResult2[i] {
+			print("The counter is ")
+			println(i)
+		}
+	}
 
 }
