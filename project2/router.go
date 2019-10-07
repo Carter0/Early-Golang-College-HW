@@ -37,7 +37,11 @@ func handleConnection(conn net.Conn) {
 			log.Fatal("error decoding message ", err)
 		}
 
-		network := gjson.Get(m.Src, "network")
+		temp, err := json.Marshal(m.Msg)
+		if err != nil {
+			panic(err)
+		}
+		network := gjson.Get(string(temp), "network")
 		print("The gjson msg value is: ")
 		println(network.String())
 	}
