@@ -69,20 +69,23 @@ func handleConnection(conn net.Conn) {
 			panic(err)
 		}
 
+		println("Creating temp variables")
+
 		tempIP := gjson.Get(string(temp), "network")
 		tempSubnet := gjson.Get(string(temp), "netmask")
 		tempTuple := networkTuple{tempIP.String(), tempSubnet.String()}
 		tempType := gjson.Get(string(temp), "type").String()
 		tempRoute = createRTData(conn, m, tempType)
 
-		//mutex.Lock()
+		println("Adding info to routing table")
+		mutex.Lock()
 		if val, ok := routingtable[tempTuple]; ok {
 			val = append(val, &tempRoute)
 		} else {
 			rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
 			routingtable[tempTuple] = rtArray
 		}
-		//mutex.Unlock()
+		mutex.Unlock()
 	}
 }
 
