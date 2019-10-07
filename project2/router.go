@@ -69,27 +69,28 @@ func handleConnection(conn net.Conn) {
 			panic(err)
 		}
 
-		println("Creating temp variables")
+		//The code is getting here for every single message.
+		//Update, dump, data etc.
 
+		//Perhaps put the logic for dumping, updating, and dataing here.
+		//You were treating this like reading in information and then doing something with it.
+		//But this is a stream, so you might have to do something with the data as you get it.
+		//Put those if conditions here so if m.type == update, do update logic
+		// if m.type == data, do data logic etc.
+
+		println("Adding Info to routing table")
 		tempIP := gjson.GetBytes(temp, "network")
 		tempSubnet := gjson.GetBytes(temp, "netmask")
 		tempTuple := networkTuple{tempIP.String(), tempSubnet.String()}
 		tempRoute = createRTData(conn, m, m.Type)
-
-		println("Adding info to routing table")
-		println("The subnet is " + tempSubnet.String())
 		mutex.Lock()
 		if val, ok := routingtable[tempTuple]; ok {
 			val = append(val, &tempRoute)
-			println("is in map already")
 		} else {
-			println("Adding data to the routing table.")
 			rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
 			routingtable[tempTuple] = rtArray
-			println("Added data to the table.")
 		}
 		mutex.Unlock()
-		println("End of goroutine")
 	}
 }
 
