@@ -78,6 +78,7 @@ func handleConnection(conn net.Conn) {
 		tempRoute = createRTData(conn, m, tempType)
 
 		println("Adding info to routing table")
+		println("The type is " + tempType)
 		mutex.Lock()
 		if val, ok := routingtable[tempTuple]; ok {
 			val = append(val, &tempRoute)
