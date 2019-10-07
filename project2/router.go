@@ -77,7 +77,7 @@ func handleConnection(conn net.Conn) {
 		tempRoute = createRTData(conn, m, m.Type)
 
 		println("Adding info to routing table")
-		println("The type is " + tempIP.String())
+		println("The subnet is " + tempSubnet.String())
 		mutex.Lock()
 		if val, ok := routingtable[tempTuple]; ok {
 			val = append(val, &tempRoute)
