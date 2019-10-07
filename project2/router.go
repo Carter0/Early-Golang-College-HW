@@ -71,10 +71,10 @@ func handleConnection(conn net.Conn) {
 
 		println("Creating temp variables")
 
-		tempIP := gjson.Get(string(temp), "network")
-		tempSubnet := gjson.Get(string(temp), "netmask")
+		tempIP := gjson.GetBytes(temp, "network")
+		tempSubnet := gjson.GetBytes(temp, "netmask")
 		tempTuple := networkTuple{tempIP.String(), tempSubnet.String()}
-		tempType := gjson.Get(string(temp), "type").String()
+		tempType := gjson.GetBytes(temp, "type").String()
 		tempRoute = createRTData(conn, m, tempType)
 
 		println("Adding info to routing table")
