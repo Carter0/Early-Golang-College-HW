@@ -86,6 +86,7 @@ func handleConnection(conn net.Conn) {
 			routingtable[tempTuple] = rtArray
 		}
 		mutex.Unlock()
+		println("End of goroutine")
 	}
 }
 
