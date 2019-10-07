@@ -29,7 +29,7 @@ func main() {
 		panic(err)
 	}
 
-	println(m.Name)
+	//println(m.Name)
 
 	//An example of using json.NewDecoder to decode a stream of json.
 	dec := json.NewDecoder(os.Stdin)
