@@ -72,7 +72,8 @@ func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
 		println(key.ip)
 		println(key.netMask)
 		for _, rtdata := range value {
-			println(&rtdata.relationshipType)
+			temp := *rtdata
+			println(temp.relationshipType)
 		}
 
 	}
