@@ -38,6 +38,14 @@ type message struct {
 var routingtable = map[networkTuple][]*rtData{}
 var mutex sync.Mutex
 
+//networkTupleEquals just determines if two network tuples are equal
+func networkTupleEquals(net1 networkTuple, net2 networkTuple) bool {
+	if net1.ip == net2.ip && net1.netMask == net2.netMask {
+		return true
+	}
+	return false
+}
+
 //IP4toInt converts an ip address into a binary sequence
 func IP4toInt(IPv4Addr string) int64 {
 	IPv4Int := big.NewInt(0)
@@ -68,13 +76,23 @@ func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
 	}
 
 	println("Forwarding update message to neighbors.")
+	mutex.Unlock()
+
+	//Here is the problem
+	//The first update message is never sent out to other neighbors
+	//because there are no other neighbors yet.
+	//Fixing this is an issue because I am not sure when exactly all
+	//neighbors will be added to the list.
+
+	mutex.Lock()
 	updateNeighbors(tempTuple, m)
 	mutex.Unlock()
+
 }
 
 func updateNeighbors(current networkTuple, mes message) {
 	for key, value := range routingtable {
-		if current != key {
+		if !networkTupleEquals(current, key) {
 			sendMessage := message{mes.Msg, mes.Dst, key.ip, mes.Type}
 			toSend, err := json.Marshal(sendMessage)
 			if err != nil {
