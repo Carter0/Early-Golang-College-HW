@@ -67,6 +67,15 @@ func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
 		rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
 		routingtable[tempTuple] = rtArray
 	}
+	for key, value := range routingtable {
+		println("The key is: ")
+		println(key.ip)
+		println(key.netMask)
+		for _, rtdata := range value {
+			println(&rtdata.relationshipType)
+		}
+
+	}
 	mutex.Unlock()
 }
 
