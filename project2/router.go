@@ -55,29 +55,36 @@ func createRTData(conn net.Conn, m message, tempType string) rtData {
 }
 
 func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
-	//This right here is the update logic
-	tempIP := gjson.GetBytes(jsonMsg, "network")
-	tempSubnet := gjson.GetBytes(jsonMsg, "netmask")
-	tempTuple := networkTuple{tempIP.String(), tempSubnet.String()}
+	tempIP := gjson.GetBytes(jsonMsg, "network").String()
+	tempSubnet := gjson.GetBytes(jsonMsg, "netmask").String()
+	tempTuple := networkTuple{tempIP, tempSubnet}
 	tempRoute := createRTData(conn, m, m.Type)
 	mutex.Lock()
 	if val, ok := routingtable[tempTuple]; ok {
 		val = append(val, &tempRoute)
 	} else {
-		rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
+		rtArray := []*rtData{&tempRoute}
 		routingtable[tempTuple] = rtArray
 	}
-	for key, value := range routingtable {
-		println("The key is: ")
-		println(key.ip)
-		println(key.netMask)
-		for _, rtdata := range value {
-			temp := *rtdata
-			println(temp.relationshipType)
-		}
 
-	}
+	println("Forwarding update message to neighbors.")
+	updateNeighbors(tempTuple, m)
 	mutex.Unlock()
+}
+
+func updateNeighbors(current networkTuple, mes message) {
+	for key, value := range routingtable {
+		if current != key {
+			sendMessage := message{mes.Msg, mes.Dst, key.ip, mes.Type}
+			toSend, err := json.Marshal(sendMessage)
+			if err != nil {
+				panic(err)
+			}
+
+			temp := *value[0]
+			temp.Conn.Write(toSend)
+		}
+	}
 }
 
 func handleConnection(conn net.Conn) {
@@ -130,21 +137,18 @@ func main() {
 		go handleConnection(conn)
 	}
 
-	//TODO make a loop through the hashmap. If statements for the key, value pairs.
-
-	for key, value := range routingtable {
-		print("Network name" + key.ip)
-		print("Network mask" + key.netMask)
-		for _, rtInfo := range value {
-			println(rtInfo.relationshipType)
-		}
-	}
-
-	//TODO, what the hell is this doing lol.
+	//Makes main thread doesn't close down.
 	select {}
-
-	//TODO send update messages to the other neighbors
-	//In update message, change the src you are given to the destination
-	//you are given. Use the neighbors source to send info over tcp
-	//You are supposed to keep a running connection to your neighbors.
 }
+
+/* Code below can be useful for testing the contents of the routing table
+for key, value := range routingtable {
+	println("The key is: ")
+	println(key.ip)
+	println(key.netMask)
+	for _, rtdata := range value {
+		temp := *rtdata
+		println(temp.relationshipType)
+	}
+}
+*/
