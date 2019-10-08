@@ -54,43 +54,47 @@ func createRTData(conn net.Conn, m message, tempType string) rtData {
 	return rtData{tempType, message, conn}
 }
 
+func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
+	//This right here is the update logic
+	tempIP := gjson.GetBytes(jsonMsg, "network")
+	tempSubnet := gjson.GetBytes(jsonMsg, "netmask")
+	tempTuple := networkTuple{tempIP.String(), tempSubnet.String()}
+	tempRoute := createRTData(conn, m, m.Type)
+	mutex.Lock()
+	if val, ok := routingtable[tempTuple]; ok {
+		val = append(val, &tempRoute)
+	} else {
+		rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
+		routingtable[tempTuple] = rtArray
+	}
+	mutex.Unlock()
+}
+
 func handleConnection(conn net.Conn) {
 	for {
-		var m message
-		var tempRoute rtData
+		var mes message
 
-		err := json.NewDecoder(conn).Decode(&m)
+		err := json.NewDecoder(conn).Decode(&mes)
 		if err != nil {
 			log.Fatal("error decoding message ", err)
 		}
 
-		temp, err := json.Marshal(m.Msg)
+		jsonMsg, err := json.Marshal(mes.Msg)
 		if err != nil {
 			panic(err)
 		}
 
-		//The code is getting here for every single message.
-		//Update, dump, data etc.
-
-		//Perhaps put the logic for dumping, updating, and dataing here.
-		//You were treating this like reading in information and then doing something with it.
-		//But this is a stream, so you might have to do something with the data as you get it.
-		//Put those if conditions here so if m.type == update, do update logic
-		// if m.type == data, do data logic etc.
-
-		println("Adding Info to routing table")
-		tempIP := gjson.GetBytes(temp, "network")
-		tempSubnet := gjson.GetBytes(temp, "netmask")
-		tempTuple := networkTuple{tempIP.String(), tempSubnet.String()}
-		tempRoute = createRTData(conn, m, m.Type)
-		mutex.Lock()
-		if val, ok := routingtable[tempTuple]; ok {
-			val = append(val, &tempRoute)
-		} else {
-			rtArray := []*rtData{&tempRoute} //Create a pointer array and add the tempRoute pointer
-			routingtable[tempTuple] = rtArray
+		switch mes.Type {
+		case "update":
+			//Either add new info to the routing table
+			//Or append data to the routing table values.
+			println("Adding info to routing table.")
+			updateLogic(jsonMsg, conn, mes)
+		case "dump":
+			fmt.Println("Dump logic here.")
+		case "data":
+			fmt.Println("Data logic here.")
 		}
-		mutex.Unlock()
 	}
 }
 
