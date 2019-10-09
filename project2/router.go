@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+
+	"github.com/tidwall/gjson"
 )
 
 // rtData contains a copy of the original message sent to the router
@@ -81,28 +83,26 @@ func createRTData(conn net.Conn, m message, tempType string) rtData {
 	return rtData{tempType, message, conn}
 }
 
-// func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
-// 	tempIP := gjson.GetBytes(jsonMsg, "network").String()
-// 	tempSubnet := gjson.GetBytes(jsonMsg, "netmask").String()
-// 	tempTuple := networkTuple{tempIP, tempSubnet}
-// 	tempRoute := createRTData(conn, m, m.Type)
-// 	mutex.Lock()
-// 	if val, ok := routingtable[tempTuple]; ok {
-// 		val = append(val, &tempRoute)
-// 	} else {
-// 		rtArray := []*rtData{&tempRoute}
-// 		routingtable[tempTuple] = rtArray
-// 	}
+func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
+	tempIP := gjson.GetBytes(jsonMsg, "network").String()
+	tempSubnet := gjson.GetBytes(jsonMsg, "netmask").String()
+	tempTuple := networkTuple{tempIP, tempSubnet}
+	tempRoute := createRTData(conn, m, m.Type)
+	if val, ok := routingtable[tempTuple]; ok {
+		val = append(val, &tempRoute)
+	} else {
+		rtArray := []*rtData{&tempRoute}
+		routingtable[tempTuple] = rtArray
+	}
 
-// 	//Broadcast logic here.
-// 	if val, ok := broadcastMessages[tempTuple]; ok {
-// 		val = append(val, &m)
-// 	} else {
-// 		toRouteArray := []*message{&m}
-// 		broadcastMessages[tempTuple] = toRouteArray
-// 	}
-// 	mutex.Unlock()
-// }
+	// //Broadcast logic here.
+	// if val, ok := broadcastMessages[tempTuple]; ok {
+	// 	val = append(val, &m)
+	// } else {
+	// 	toRouteArray := []*message{&m}
+	// 	broadcastMessages[tempTuple] = toRouteArray
+	// }
+}
 
 // func updateNeighbors() {
 // 	for messageKey, messageList := range broadcastMessages {
@@ -160,34 +160,38 @@ func main() {
 
 	/*
 		TODO: Make a loop through the queue one at a time. Make sure to test this works properly.
-		TODO: You will need a waitgroup to wait for all the goroutines to finish.
-			  Then make sure that main function runs once all the goroutines are done.
 	*/
 
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// switch message.Type {
-	// case "update":
-	// 	//Either add new info to the routing table
-	// 	//Or append data to the routing table values.
-	// 	println("Adding info to routing table.")
-	// 	updateLogic(jsonMsg, conn, message)
-	// case "dump":
-	// 	fmt.Println("Dump logic here.")
-	// case "data":
-	// 	//Since all data functionality happens after update funcitonality,
-	// 	//put send data to neighbors stuff here.
-	// 	println("Forwarding update message to neighbors.")
-	// 	mutex.Lock()
-	// 	//updateNeighbors()
-	// 	mutex.Unlock()
+	for _, conn := range queue {
 
-	// 	fmt.Println("Data logic here.")
-	// }
+		var message message
+		err := json.NewDecoder(conn).Decode(&message)
+		if err != nil {
+			panic(err)
+		}
 
-	//Makes main thread doesn't close down.
-	//select {}
+		jsonMsg, err := json.Marshal(message.Msg)
+		if err != nil {
+			panic(err)
+		}
+
+		switch message.Type {
+		case "update":
+			//Either add new info to the routing table
+			//Or append data to the routing table values.
+			println("Adding info to routing table.")
+			updateLogic(jsonMsg, conn, message)
+		case "dump":
+			fmt.Println("Dump logic here.")
+		case "data":
+			//Since all data functionality happens after update funcitonality,
+			//put send data to neighbors stuff here.
+			println("Forwarding update message to neighbors.")
+			//updateNeighbors()
+			fmt.Println("Data logic here.")
+		}
+	}
+
 }
 
 /* Code below can be useful for testing the contents of the routing table
