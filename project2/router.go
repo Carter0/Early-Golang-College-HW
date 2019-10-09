@@ -22,6 +22,7 @@ type rtData struct {
 }
 
 // networkTuple represents the list of paths for our network.
+//TODO, this is not unique, consider port numbers as well.
 type networkTuple struct {
 	ip      string //ip to send data through
 	netMask string //subet mask for the ip
@@ -62,6 +63,16 @@ func createRTData(conn net.Conn, m message, tempType string) rtData {
 	return rtData{tempType, message, conn}
 }
 
+//Temp Solution
+/*
+	1. Create a separate list of messages to send out to other networks and map them to the networkTuple
+	2. In the updateNeighbors function, loop through the routing table and correctly set the send out message
+	3. Send out the message to all other neighbors but the neighbor that sent you the message
+	4. After you are done, remove that message from the list.
+
+	I think this works, but it doesn't feel like the best solution. But it does feel good enough.
+*/
+
 func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
 	tempIP := gjson.GetBytes(jsonMsg, "network").String()
 	tempSubnet := gjson.GetBytes(jsonMsg, "netmask").String()
@@ -74,35 +85,26 @@ func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
 		rtArray := []*rtData{&tempRoute}
 		routingtable[tempTuple] = rtArray
 	}
-
-	println("Forwarding update message to neighbors.")
 	mutex.Unlock()
-
-	//Here is the problem
-	//The first update message is never sent out to other neighbors
-	//because there are no other neighbors yet.
-	//Fixing this is an issue because I am not sure when exactly all
-	//neighbors will be added to the list.
-
-	mutex.Lock()
-	updateNeighbors(tempTuple, m)
-	mutex.Unlock()
-
 }
 
-func updateNeighbors(current networkTuple, mes message) {
-	for key, value := range routingtable {
-		if !networkTupleEquals(current, key) {
-			sendMessage := message{mes.Msg, mes.Dst, key.ip, mes.Type}
-			toSend, err := json.Marshal(sendMessage)
-			if err != nil {
-				panic(err)
-			}
-
-			temp := *value[0]
-			temp.Conn.Write(toSend)
-		}
-	}
+//Update neighbors forwards update messages to the neighbors.
+func updateNeighbors() {
+	// for forwardKey, forwardValue := range routingtable {
+	// 	for key := range routingtable {
+	// 		if !networkTupleEquals(forwardKey, key) {
+	// 			for _, rtdata := range forwardValue {
+	// 				temp := *rtdata
+	// 				sendMessage := message{temp.Msg, temp.mes.Dst, key.ip, temp.mes.Type}
+	// 				toSend, err := json.Marshal(sendMessage)
+	// 				if err != nil {
+	// 					panic(err)
+	// 				}
+	// 				temp.Conn.Write(toSend)
+	// 			}
+	// 		}
+	// 	}
+	// }
 }
 
 func handleConnection(conn net.Conn) {
@@ -128,6 +130,13 @@ func handleConnection(conn net.Conn) {
 		case "dump":
 			fmt.Println("Dump logic here.")
 		case "data":
+			//Since all data functionality happens after update funcitonality,
+			//put send data to neighbors stuff here.
+			println("Forwarding update message to neighbors.")
+			mutex.Lock()
+			updateNeighbors()
+			mutex.Unlock()
+
 			fmt.Println("Data logic here.")
 		}
 	}
