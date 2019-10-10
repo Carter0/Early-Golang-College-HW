@@ -180,8 +180,10 @@ func main() {
 	wg.Wait()
 
 	println("Start looping through Queue")
+	println(len(routingtable))
 
 	for key, value := range routingtable {
+
 		println("The key is: ")
 		println(key.ip)
 		println(key.netMask)
