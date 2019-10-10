@@ -180,6 +180,17 @@ func main() {
 	wg.Wait()
 
 	println("Start looping through Queue")
+
+	for key, value := range routingtable {
+		println("The key is: ")
+		println(key.ip)
+		println(key.netMask)
+		for _, rtdata := range value {
+			temp := *rtdata
+			println(temp.relationshipType)
+		}
+	}
+
 	for _, message := range queue {
 
 		jsonMsg, err := json.Marshal(message.Msg)
