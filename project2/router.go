@@ -136,8 +136,7 @@ func handleConnection(conn net.Conn, networkName string) {
 
 	println("Locking the code.")
 	mutex.Lock()
-
-	println("Addign conn to queue")
+	println("Adding conn to queue")
 	addToQueue(conn)
 	var msg message
 	println("Decoding the message")
