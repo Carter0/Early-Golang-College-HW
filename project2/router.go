@@ -132,7 +132,8 @@ func handleConnection(conn net.Conn, networkName string) {
 	mutex.Lock()
 	addToQueue(conn)
 	var msg message
-	err := json.NewDecoder(conn).Decode(&msg)
+	newConn := conn
+	err := json.NewDecoder(newConn).Decode(&msg)
 	if err != nil {
 		panic(err)
 	}
