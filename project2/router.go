@@ -106,6 +106,7 @@ func updateLogic(jsonMsg []byte, m message) {
 		rtArray := []*rtData{&tempRoute}
 		routingtable[tempTuple] = rtArray
 	}
+	println("end of update")
 }
 
 //Updated neighbors forwards update messages to neighbors.
