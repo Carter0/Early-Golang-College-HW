@@ -138,18 +138,18 @@ func handleConnection(conn net.Conn, networkName string) {
 		panic(err)
 	}
 
-	println(msg.Type)
+	//println(msg.Type)
 
-	println("Adding entry to network map")
-	if val, ok := networkMap[networkName]; ok {
-		val.Msg = append(val.Msg, msg)
+	// println("Adding entry to network map")
+	// if val, ok := networkMap[networkName]; ok {
+	// 	val.Msg = append(val.Msg, msg)
 
-	} else {
-		temp := []message{}
-		temp = append(temp, msg)
-		tempNet := networkInfo{temp, conn}
-		networkMap[networkName] = tempNet
-	}
+	// } else {
+	// 	temp := []message{}
+	// 	temp = append(temp, msg)
+	// 	tempNet := networkInfo{temp, conn}
+	// 	networkMap[networkName] = tempNet
+	// }
 
 	mutex.Unlock()
 	wg.Done()
@@ -194,7 +194,7 @@ func main() {
 			panic(err)
 		}
 
-		//println("The message type is " + message.Type)
+		println("The message type is " + message.Type)
 
 		println("Start looping through Message type.")
 		switch message.Type {
@@ -205,7 +205,7 @@ func main() {
 			fmt.Println("Dump logic here.")
 		case "data":
 			println("Forwarding update message to neighbors.")
-			updateNeighbors()
+			//updateNeighbors()
 			fmt.Println("Data logic here.")
 
 		}
