@@ -132,24 +132,23 @@ func handleConnection(conn net.Conn, networkName string) {
 	mutex.Lock()
 	addToQueue(conn)
 	var msg message
-	newConn := conn
-	err := json.NewDecoder(newConn).Decode(&msg)
+	err := json.NewDecoder(conn).Decode(&msg)
 	if err != nil {
 		panic(err)
 	}
 
-	//println(msg.Type)
+	println(msg.Type)
 
-	// println("Adding entry to network map")
-	// if val, ok := networkMap[networkName]; ok {
-	// 	val.Msg = append(val.Msg, msg)
+	println("Adding entry to network map")
+	if val, ok := networkMap[networkName]; ok {
+		val.Msg = append(val.Msg, msg)
 
-	// } else {
-	// 	temp := []message{}
-	// 	temp = append(temp, msg)
-	// 	tempNet := networkInfo{temp, conn}
-	// 	networkMap[networkName] = tempNet
-	// }
+	} else {
+		temp := []message{}
+		temp = append(temp, msg)
+		tempNet := networkInfo{temp, conn}
+		networkMap[networkName] = tempNet
+	}
 
 	mutex.Unlock()
 	wg.Done()
@@ -182,7 +181,8 @@ func main() {
 	println("Start looping through Queue")
 	print("The size of the queue is")
 	println(len(queue))
-	for _, conn := range queue {
+	for len(queue) != 0 {
+		conn := removeFromQueue()
 		var message message
 		err := json.NewDecoder(conn).Decode(&message)
 		if err != nil {
@@ -194,7 +194,7 @@ func main() {
 			panic(err)
 		}
 
-		println("The message type is " + message.Type)
+		//println("The message type is " + message.Type)
 
 		println("Start looping through Message type.")
 		switch message.Type {
@@ -205,7 +205,7 @@ func main() {
 			fmt.Println("Dump logic here.")
 		case "data":
 			println("Forwarding update message to neighbors.")
-			//updateNeighbors()
+			updateNeighbors()
 			fmt.Println("Data logic here.")
 
 		}
