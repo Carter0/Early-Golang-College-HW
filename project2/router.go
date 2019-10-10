@@ -190,6 +190,8 @@ func main() {
 			panic(err)
 		}
 
+		println("The message type is " + message.Type)
+
 		println("Start looping through Message type.")
 		switch message.Type {
 		case "update":
