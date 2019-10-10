@@ -182,8 +182,8 @@ func main() {
 	for _, conn := range queue {
 
 		for key, value := range networkMap {
-			println(key)
-			println(value.Msg[0])
+			fmt.Println(key)
+			fmt.Println(value.Msg[0].Type)
 		}
 
 		var message message
