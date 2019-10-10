@@ -131,6 +131,7 @@ func updateNeighbors() {
 }
 
 func handleConnection(conn net.Conn, networkName string) {
+	mutex.Lock()
 
 	var msg message
 	err := json.NewDecoder(conn).Decode(&msg)
@@ -151,11 +152,11 @@ func handleConnection(conn net.Conn, networkName string) {
 		networkMap[networkName] = tempNet
 	}
 
+	mutex.Unlock()
 	wg.Done()
 }
 
 func main() {
-
 	args := os.Args
 	ip := make([]string, len(args))
 	port := make([]string, len(args))
@@ -180,6 +181,8 @@ func main() {
 
 	println("Start looping through Queue")
 	for _, message := range queue {
+
+		println(len(queue))
 
 		jsonMsg, err := json.Marshal(message.Msg)
 		if err != nil {
