@@ -96,6 +96,7 @@ func createRTData(m message, tempType string) rtData {
 
 func updateLogic(jsonMsg []byte, m message) {
 	tempIP := gjson.GetBytes(jsonMsg, "network").String()
+	println("The temp ip is " + tempIP)
 	tempSubnet := gjson.GetBytes(jsonMsg, "netmask").String()
 	tempTuple := networkTuple{tempIP, tempSubnet}
 	tempRoute := createRTData(m, m.Type)
