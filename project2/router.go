@@ -104,42 +104,29 @@ func contains(s []message, e message) bool {
 	return false
 }
 
+//Updated neighbors forwards update messages to neighbors.
+//The most disgusting fucntion ever that hopefully works.
 func updateNeighbors() {
-
-	// for _, mes := range messages {
-	// 	if !contains(broadcastMessages, mes) {
-	// 		toSendWrong := mes
-	// 		broadcastMessages = append(broadcastMessages, mes)
-	// 		for key, value := range routingtable {
-	// 			if ()
-	// 		}
-	// 	}
-	// }
-
-	// if !networkTupleEquals(messageKey, key) {
-	// 	for _, routeMessage := range messageList {
-	// 		temp := *routeMessage
-	// 		sendMessage := message{temp.Msg, temp.Dst, key.ip, temp.Type}
-	// 		toSend, err := json.Marshal(sendMessage)
-	// 		if err != nil {
-	// 			panic(err)
-	// 		}
-	// 		for _, rtdata := range value {
-	// 			rtdata.Conn.Write(toSend)
-	// 		}
-	// 	}
-	// }
-
+	for ip, netInfo := range networkMap {
+		for _, msgToSendUnformatted := range netInfo.Msg {
+			for ip2, netInfo := range networkMap {
+				if ip2 != ip {
+					sendMessage := message{msgToSendUnformatted.Msg, msgToSendUnformatted.Dst, ip2, msgToSendUnformatted.Type}
+					toSend, err := json.Marshal(sendMessage)
+					if err != nil {
+						panic(err)
+					}
+					netInfo.Conn.Write(toSend)
+				}
+			}
+		}
+	}
 }
 
 func handleConnection(conn net.Conn, networkName string) {
-
-	println("Locking the code.")
 	mutex.Lock()
-	println("Adding conn to queue")
 	addToQueue(conn)
 	var msg message
-	println("Decoding the message")
 	err := json.NewDecoder(conn).Decode(&msg)
 	if err != nil {
 		panic(err)
@@ -149,7 +136,6 @@ func handleConnection(conn net.Conn, networkName string) {
 	if val, ok := networkMap[networkName]; ok {
 		val.Msg = append(val.Msg, msg)
 	} else {
-		println("Adding entry to empty map.")
 		temp := []message{}
 		temp = append(temp, msg)
 		tempNet := networkInfo{temp, conn}
@@ -158,7 +144,6 @@ func handleConnection(conn net.Conn, networkName string) {
 
 	mutex.Unlock()
 	wg.Done()
-	println("Unlocking the code and finish goroutine.")
 }
 
 func main() {
@@ -217,7 +202,7 @@ func main() {
 			//Since all data functionality happens after update funcitonality,
 			//put send data to neighbors stuff here.
 			println("Forwarding update message to neighbors.")
-			//updateNeighbors()
+			updateNeighbors()
 			fmt.Println("Data logic here.")
 		}
 	}
