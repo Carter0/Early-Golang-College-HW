@@ -173,6 +173,8 @@ func main() {
 	wg.Wait()
 
 	println("Start looping through Queue")
+	print("The size of the queue is")
+	println(len(queue))
 	for _, conn := range queue {
 		var message message
 		err := json.NewDecoder(conn).Decode(&message)
