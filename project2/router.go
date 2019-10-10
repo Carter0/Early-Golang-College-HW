@@ -179,8 +179,8 @@ func main() {
 
 	wg.Wait()
 
+	println("Start looping through Queue")
 	for _, conn := range queue {
-
 		for key, value := range networkMap {
 			fmt.Println(key)
 			fmt.Println(value.Msg[0].Type)
@@ -197,6 +197,7 @@ func main() {
 			panic(err)
 		}
 
+		println("Start looping through Message type.")
 		switch message.Type {
 		case "update":
 			//Either add new info to the routing table
