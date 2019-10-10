@@ -136,13 +136,17 @@ func handleConnection(conn net.Conn, networkName string) {
 
 	println("Locking the code.")
 	mutex.Lock()
+
+	println("Addign conn to queue")
 	addToQueue(conn)
 	var msg message
+	println("Decoding the message")
 	err := json.NewDecoder(conn).Decode(&msg)
 	if err != nil {
 		panic(err)
 	}
 
+	println("Adding entry to network map")
 	if val, ok := networkMap[networkName]; ok {
 		val.Msg = append(val.Msg, msg)
 	} else {
