@@ -117,6 +117,7 @@ func updateNeighbors() {
 						panic(err)
 					}
 					netInfo.Conn.Write(toSend)
+					println("A message was sent.")
 				}
 			}
 		}
@@ -173,11 +174,6 @@ func main() {
 
 	println("Start looping through Queue")
 	for _, conn := range queue {
-		for key, value := range networkMap {
-			fmt.Println(key)
-			fmt.Println(value.Msg[0].Type)
-		}
-
 		var message message
 		err := json.NewDecoder(conn).Decode(&message)
 		if err != nil {
@@ -192,15 +188,11 @@ func main() {
 		println("Start looping through Message type.")
 		switch message.Type {
 		case "update":
-			//Either add new info to the routing table
-			//Or append data to the routing table values.
 			println("Adding info to routing table.")
 			updateLogic(jsonMsg, message)
 		case "dump":
 			fmt.Println("Dump logic here.")
 		case "data":
-			//Since all data functionality happens after update funcitonality,
-			//put send data to neighbors stuff here.
 			println("Forwarding update message to neighbors.")
 			updateNeighbors()
 			fmt.Println("Data logic here.")
