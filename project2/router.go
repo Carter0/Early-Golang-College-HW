@@ -149,6 +149,7 @@ func handleConnection(conn net.Conn, networkName string) {
 	if val, ok := networkMap[networkName]; ok {
 		val.Msg = append(val.Msg, msg)
 	} else {
+		println("Adding entry to empty map.")
 		var temp []message
 		temp = append(temp, msg)
 		networkMap[networkName] = networkInfo{temp, conn}
