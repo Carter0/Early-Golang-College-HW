@@ -41,7 +41,7 @@ type networkInfo struct {
 
 var queue []net.Conn
 var routingtable = map[networkTuple][]*rtData{}
-var networkMap map[string]networkInfo
+var networkMap = make(map[string]networkInfo)
 var mutex sync.Mutex
 var wg sync.WaitGroup
 
@@ -152,7 +152,8 @@ func handleConnection(conn net.Conn, networkName string) {
 		println("Adding entry to empty map.")
 		temp := []message{}
 		temp = append(temp, msg)
-		networkMap[networkName] = networkInfo{temp, conn}
+		tempNet := networkInfo{temp, conn}
+		networkMap[networkName] = tempNet
 	}
 
 	mutex.Unlock()
