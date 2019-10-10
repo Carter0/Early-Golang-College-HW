@@ -82,17 +82,17 @@ func createRTData(m message, tempType string) rtData {
 	return rtData{tempType, message}
 }
 
-// func dataLogic(m message) {
-// 	packetDst := IP4toInt(m.Dst)
-// 	for key, value := range routingtable {
-// 		netmask := IP4toInt(key.netMask)
-// 		possibleToRoute := IP4toInt(key.ip) & netmask
-// 		maskedPackDst := packetDst & netmask
-// 		if possibleToRoute == maskedPackDst {
+func dataLogic(m message) {
+	packetDst := IP4toInt(m.Dst)
+	for key, value := range routingtable {
+		netmask := IP4toInt(key.netMask)
+		possibleToRoute := IP4toInt(key.ip) & netmask
+		maskedPackDst := packetDst & netmask
+		if possibleToRoute == maskedPackDst {
 
-// 		}
-// 	}
-//}
+		}
+	}
+}
 
 func updateLogic(jsonMsg []byte, m message) {
 	tempIP := gjson.GetBytes(jsonMsg, "network").String()
@@ -131,7 +131,6 @@ func updateNeighbors() {
 }
 
 func handleConnection(conn net.Conn, networkName string) {
-	mutex.Lock()
 
 	var msg message
 	err := json.NewDecoder(conn).Decode(&msg)
@@ -152,7 +151,6 @@ func handleConnection(conn net.Conn, networkName string) {
 		networkMap[networkName] = tempNet
 	}
 
-	mutex.Unlock()
 	wg.Done()
 }
 
