@@ -106,6 +106,7 @@ func updateLogic(jsonMsg []byte, m message) {
 		rtArray := []*rtData{&tempRoute}
 		routingtable[tempTuple] = rtArray
 	}
+	println(len(routingtable))
 	println("end of update")
 }
 
@@ -180,19 +181,6 @@ func main() {
 	wg.Wait()
 
 	println("Start looping through Queue")
-	println(len(routingtable))
-
-	for key, value := range routingtable {
-
-		println("The key is: ")
-		println(key.ip)
-		println(key.netMask)
-		for _, rtdata := range value {
-			temp := *rtdata
-			println(temp.relationshipType)
-		}
-	}
-
 	for _, message := range queue {
 
 		jsonMsg, err := json.Marshal(message.Msg)
