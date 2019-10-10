@@ -185,12 +185,22 @@ func main() {
 			panic(err)
 		}
 
+		for key, value := range routingtable {
+			println("The key is: ")
+			println(key.ip)
+			println(key.netMask)
+			for _, rtdata := range value {
+				temp := *rtdata
+				println(temp.relationshipType)
+			}
+		}
+
 		jsonMsg, err := json.Marshal(message.Msg)
 		if err != nil {
 			panic(err)
 		}
 
-		println("The message type is " + message.Type)
+		//println("The message type is " + message.Type)
 
 		println("Start looping through Message type.")
 		switch message.Type {
