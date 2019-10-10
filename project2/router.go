@@ -17,7 +17,6 @@ import (
 type rtData struct {
 	relationshipType string
 	Msg              []byte
-	Conn             net.Conn
 }
 
 // networkTuple represents the list of paths for our network.
@@ -35,14 +34,14 @@ type message struct {
 	Type string      `json:"type"`
 }
 
-type msgConnection struct {
-	Msg  message
-	conn net.Conn
+type networkInfo struct {
+	Msg  []message
+	Conn net.Conn
 }
 
-//var broadcastMessages = map[networkTuple][]*message{}
 var queue []net.Conn
 var routingtable = map[networkTuple][]*rtData{}
+var networkMap map[string]networkInfo
 var mutex sync.Mutex
 var wg sync.WaitGroup
 
@@ -75,58 +74,82 @@ func IP4toInt(IPv4Addr string) int64 {
 }
 
 //CreateRTData creates the routing table information
-func createRTData(conn net.Conn, m message, tempType string) rtData {
+func createRTData(m message, tempType string) rtData {
 	message, err := json.Marshal(m.Msg)
 	if err != nil {
 		panic(err)
 	}
-	return rtData{tempType, message, conn}
+	return rtData{tempType, message}
 }
 
-func updateLogic(jsonMsg []byte, conn net.Conn, m message) {
+func updateLogic(jsonMsg []byte, m message) {
 	tempIP := gjson.GetBytes(jsonMsg, "network").String()
 	tempSubnet := gjson.GetBytes(jsonMsg, "netmask").String()
 	tempTuple := networkTuple{tempIP, tempSubnet}
-	tempRoute := createRTData(conn, m, m.Type)
+	tempRoute := createRTData(m, m.Type)
 	if val, ok := routingtable[tempTuple]; ok {
 		val = append(val, &tempRoute)
 	} else {
 		rtArray := []*rtData{&tempRoute}
 		routingtable[tempTuple] = rtArray
 	}
-
-	// //Broadcast logic here.
-	// if val, ok := broadcastMessages[tempTuple]; ok {
-	// 	val = append(val, &m)
-	// } else {
-	// 	toRouteArray := []*message{&m}
-	// 	broadcastMessages[tempTuple] = toRouteArray
-	// }
 }
 
-// func updateNeighbors() {
-// 	for messageKey, messageList := range broadcastMessages {
-// 		for key, value := range routingtable {
-// 			if !networkTupleEquals(messageKey, key) {
-// 				for _, routeMessage := range messageList {
-// 					temp := *routeMessage
-// 					sendMessage := message{temp.Msg, temp.Dst, key.ip, temp.Type}
-// 					toSend, err := json.Marshal(sendMessage)
-// 					if err != nil {
-// 						panic(err)
-// 					}
-// 					for _, rtdata := range value {
-// 						rtdata.Conn.Write(toSend)
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
-// }
+func contains(s []message, e message) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
 
-func handleConnection(conn net.Conn) {
+func updateNeighbors() {
+
+	// for _, mes := range messages {
+	// 	if !contains(broadcastMessages, mes) {
+	// 		toSendWrong := mes
+	// 		broadcastMessages = append(broadcastMessages, mes)
+	// 		for key, value := range routingtable {
+	// 			if ()
+	// 		}
+	// 	}
+	// }
+
+	// if !networkTupleEquals(messageKey, key) {
+	// 	for _, routeMessage := range messageList {
+	// 		temp := *routeMessage
+	// 		sendMessage := message{temp.Msg, temp.Dst, key.ip, temp.Type}
+	// 		toSend, err := json.Marshal(sendMessage)
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+	// 		for _, rtdata := range value {
+	// 			rtdata.Conn.Write(toSend)
+	// 		}
+	// 	}
+	// }
+
+}
+
+func handleConnection(conn net.Conn, networkName string) {
 	mutex.Lock()
 	addToQueue(conn)
+
+	var msg message
+	err := json.NewDecoder(conn).Decode(&msg)
+	if err != nil {
+		panic(err)
+	}
+
+	if val, ok := networkMap[networkName]; ok {
+		val.Msg = append(val.Msg, msg)
+	} else {
+		var temp []message
+		temp = append(temp, msg)
+		networkMap[networkName] = networkInfo{temp, conn}
+	}
+
 	mutex.Unlock()
 	wg.Done()
 }
@@ -151,18 +174,17 @@ func main() {
 
 		fmt.Println("Starting goroutines")
 		wg.Add(1)
-		go handleConnection(conn)
+		go handleConnection(conn, ip[i])
 	}
 
 	wg.Wait()
 
-	println("The counter is now 0 and it is printing a message.")
-
-	/*
-		TODO: Make a loop through the queue one at a time. Make sure to test this works properly.
-	*/
-
 	for _, conn := range queue {
+
+		for key, value := range networkMap {
+			println(key)
+			println(value.Msg[0])
+		}
 
 		var message message
 		err := json.NewDecoder(conn).Decode(&message)
@@ -180,7 +202,7 @@ func main() {
 			//Either add new info to the routing table
 			//Or append data to the routing table values.
 			println("Adding info to routing table.")
-			updateLogic(jsonMsg, conn, message)
+			updateLogic(jsonMsg, message)
 		case "dump":
 			fmt.Println("Dump logic here.")
 		case "data":
