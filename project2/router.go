@@ -137,9 +137,12 @@ func handleConnection(conn net.Conn, networkName string) {
 		panic(err)
 	}
 
+	println(msg.Type)
+
 	println("Adding entry to network map")
 	if val, ok := networkMap[networkName]; ok {
 		val.Msg = append(val.Msg, msg)
+
 	} else {
 		temp := []message{}
 		temp = append(temp, msg)
@@ -183,16 +186,6 @@ func main() {
 		err := json.NewDecoder(conn).Decode(&message)
 		if err != nil {
 			panic(err)
-		}
-
-		for key, value := range routingtable {
-			println("The key is: ")
-			println(key.ip)
-			println(key.netMask)
-			for _, rtdata := range value {
-				temp := *rtdata
-				println(temp.relationshipType)
-			}
 		}
 
 		jsonMsg, err := json.Marshal(message.Msg)
