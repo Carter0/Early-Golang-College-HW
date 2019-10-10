@@ -133,9 +133,10 @@ func updateNeighbors() {
 }
 
 func handleConnection(conn net.Conn, networkName string) {
+
+	println("Locking the code.")
 	mutex.Lock()
 	addToQueue(conn)
-
 	var msg message
 	err := json.NewDecoder(conn).Decode(&msg)
 	if err != nil {
@@ -152,6 +153,7 @@ func handleConnection(conn net.Conn, networkName string) {
 
 	mutex.Unlock()
 	wg.Done()
+	println("Unlocking the code and finish goroutine.")
 }
 
 func main() {
