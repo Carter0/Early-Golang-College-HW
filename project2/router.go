@@ -82,6 +82,18 @@ func createRTData(m message, tempType string) rtData {
 	return rtData{tempType, message}
 }
 
+func dataLogic(m message) {
+	packetDst := IP4toInt(m.Dst)
+	for key, value := range routingtable {
+		netmask := IP4toInt(key.netMask)
+		possibleToRoute := IP4toInt(key.ip) & netmask
+		maskedPackDst := packetDst & netmask
+		if possibleToRoute == maskedPackDst {
+
+		}
+	}
+}
+
 func updateLogic(jsonMsg []byte, m message) {
 	tempIP := gjson.GetBytes(jsonMsg, "network").String()
 	tempSubnet := gjson.GetBytes(jsonMsg, "netmask").String()
@@ -93,15 +105,6 @@ func updateLogic(jsonMsg []byte, m message) {
 		rtArray := []*rtData{&tempRoute}
 		routingtable[tempTuple] = rtArray
 	}
-}
-
-func contains(s []message, e message) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 //Updated neighbors forwards update messages to neighbors.
@@ -157,8 +160,6 @@ func main() {
 		ip[i] = split[0]
 		port[i] = split[1]
 
-		fmt.Println("Socket connection")
-
 		//Open sockets and start listening.
 		conn, err := net.Dial("unixpacket", "./"+ip[i])
 		if err != nil {
@@ -166,6 +167,7 @@ func main() {
 		}
 
 		fmt.Println("Starting goroutines")
+		println(ip[i])
 		wg.Add(1)
 		go handleConnection(conn, ip[i])
 	}
@@ -198,6 +200,7 @@ func main() {
 			println("Forwarding update message to neighbors.")
 			updateNeighbors()
 			fmt.Println("Data logic here.")
+
 		}
 	}
 
