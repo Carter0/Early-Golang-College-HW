@@ -39,21 +39,21 @@ type networkInfo struct {
 	Conn net.Conn
 }
 
-var queue []net.Conn
+var queue []message
 var routingtable = map[networkTuple][]*rtData{}
 var networkMap = make(map[string]networkInfo)
 var mutex sync.Mutex
 var wg sync.WaitGroup
 
 //addToQueue adds an element to a queue
-func addToQueue(conn net.Conn) {
-	queue = append(queue, conn)
+func addToQueue(msg message) {
+	queue = append(queue, msg)
 }
 
 //removeFromQueue returns the first element of the list
-func removeFromQueue() net.Conn {
+func removeFromQueue() message {
 	temp := queue[0]
-	queue[0] = nil
+	queue[0] = message{}
 	queue = queue[1:]
 	return temp
 }
@@ -130,7 +130,7 @@ func updateNeighbors() {
 
 func handleConnection(conn net.Conn, networkName string) {
 	mutex.Lock()
-	addToQueue(conn)
+
 	var msg message
 	err := json.NewDecoder(conn).Decode(&msg)
 	if err != nil {
@@ -138,11 +138,11 @@ func handleConnection(conn net.Conn, networkName string) {
 	}
 
 	println(msg.Type)
+	addToQueue(msg)
 
 	println("Adding entry to network map")
 	if val, ok := networkMap[networkName]; ok {
 		val.Msg = append(val.Msg, msg)
-
 	} else {
 		temp := []message{}
 		temp = append(temp, msg)
@@ -179,15 +179,7 @@ func main() {
 	wg.Wait()
 
 	println("Start looping through Queue")
-	print("The size of the queue is")
-	println(len(queue))
-	for len(queue) != 0 {
-		conn := removeFromQueue()
-		var message message
-		err := json.NewDecoder(conn).Decode(&message)
-		if err != nil {
-			panic(err)
-		}
+	for _, message := range queue {
 
 		jsonMsg, err := json.Marshal(message.Msg)
 		if err != nil {
