@@ -43,7 +43,8 @@ var queue []message
 var routingtable = map[networkTuple][]*rtData{}
 var networkMap = make(map[string]networkInfo)
 var mutex sync.Mutex
-var wg sync.WaitGroup
+
+//var wg sync.WaitGroup
 
 //addToQueue adds an element to a queue
 func addToQueue(msg message) {
@@ -153,7 +154,7 @@ func handleConnection(conn net.Conn, networkName string) {
 	}
 
 	mutex.Unlock()
-	wg.Done()
+	//wg.Done()
 }
 
 func main() {
@@ -173,11 +174,11 @@ func main() {
 
 		fmt.Println("Starting goroutines")
 		println(ip[i])
-		wg.Add(1)
+		//wg.Add(1)
 		go handleConnection(conn, ip[i])
 	}
 
-	wg.Wait()
+	//wg.Wait()
 
 	println("Start looping through Queue")
 	for _, message := range queue {
@@ -205,7 +206,7 @@ func main() {
 
 		}
 	}
-
+	select {}
 }
 
 /* Code below can be useful for testing the contents of the routing table
