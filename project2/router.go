@@ -43,7 +43,8 @@ var queue []message
 var routingtable = map[networkTuple][]*rtData{}
 var networkMap = make(map[string]networkInfo)
 var mutex sync.Mutex
-var wg sync.WaitGroup
+
+//var wg sync.WaitGroup
 
 //addToQueue adds an element to a queue
 func addToQueue(msg message) {
@@ -205,7 +206,7 @@ func main() {
 
 		}
 	}
-
+	select {}
 }
 
 /* Code below can be useful for testing the contents of the routing table
