@@ -1,4 +1,4 @@
 build:
-	GOMAXPROCS=3 go build -o router .
+	GOMAXPROCS=1 go build -o router .
 
 

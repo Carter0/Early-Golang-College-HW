@@ -153,7 +153,7 @@ func handleConnection(conn net.Conn, networkName string) {
 	}
 
 	mutex.Unlock()
-	wg.Done()
+	//wg.Done()
 }
 
 func main() {
@@ -173,11 +173,11 @@ func main() {
 
 		fmt.Println("Starting goroutines")
 		println(ip[i])
-		wg.Add(1)
+		//wg.Add(1)
 		go handleConnection(conn, ip[i])
 	}
 
-	wg.Wait()
+	//wg.Wait()
 
 	println("Start looping through Queue")
 	for _, message := range queue {
